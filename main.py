@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from button import Button, MenuButton
+from character import Character
 
 clock = pygame.time.Clock()
 
@@ -19,10 +20,10 @@ def get_font(size):
 
 def main_menu():
     pygame.display.set_caption("MENU")
-    
+
     while True:
         SCREEN.blit(BG, (0, 0))
-
+        
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
         MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
@@ -72,22 +73,31 @@ def main_menu():
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
-
+            
             pygame.display.update()
 
-
 def singleplayer():
+    player = Character((100, 300))
+
+    player_group = pygame.sprite.GroupSingle()
+    player_group.add(player)
+
     while True:
+        clock.tick(60)
+
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("black")
-
-        PLAY_TEXT = get_font(45).render("This is the SINGLEPLAYER screen.", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 260))
+        SCREEN.fill("black") 
+        
+        player.update(WINDOW_SIZE) 
+        player_group.draw(SCREEN)
+        
+        PLAY_TEXT = get_font(45).render("SINGLEPLAYER", True, "White")
+        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 50))
         SCREEN.blit(PLAY_TEXT, PLAY_RECT)
 
-        PLAY_BACK = Button(image=None, pos=(640, 460), 
-                            text_input="BACK", font=get_font(75), base_color="White", hovering_color="Green")
+        PLAY_BACK = Button(image=None, pos=(1100, 650), 
+                            text_input="BACK", font=get_font(50), base_color="White", hovering_color="Green")
 
         PLAY_BACK.changeColor(PLAY_MOUSE_POS)
         PLAY_BACK.update(SCREEN)
@@ -96,6 +106,22 @@ def singleplayer():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    player.moving_right = True
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    player.moving_left = True
+                
+                if event.key == pygame.K_SPACE or event.key == pygame.K_w or event.key == pygame.K_UP:
+                    player.jump()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
+                    player.moving_right = False
+                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
+                    player.moving_left = False
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
                     main_menu()
@@ -155,3 +181,5 @@ def options():
         pygame.display.update()
 
 main_menu()
+
+
