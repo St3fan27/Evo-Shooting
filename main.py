@@ -15,6 +15,8 @@ BG = pygame.transform.scale(BG, (1280, 720))
 
 BUTTON_IMAGE = pygame.image.load("assets/craftpix-net-894687-free-gui-for-cyberpunk-pixel-art/6 Buttons/1/1_04.png")
 
+SURFACE = pygame.Surface((1280, 720), pygame.SRCALPHA)
+
 def get_font(size): 
     return pygame.font.Font("assets/craftpix-net-894687-free-gui-for-cyberpunk-pixel-art/10 Font/CyberpunkCraftpixPixel.otf", size)
 
@@ -77,54 +79,78 @@ def main_menu():
             pygame.display.update()
 
 def singleplayer():
-    player = Cyborg((100, 300))
+    pause = False
 
-    player_group = pygame.sprite.GroupSingle()
-    player_group.add(player)
+    player1 = Punk((200, 300), controls="WASD")
+    player2 = Biker((1000, 300), controls="ARROWS") 
+
+    players_group = pygame.sprite.Group() 
+    players_group.add(player1)
+    players_group.add(player2)
+
+    resume_btn = MenuButton(image=pygame.transform.scale(BUTTON_IMAGE, (600, 100)), pos=(640, 250), 
+                            text_input="RESUME", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    restart_btn = MenuButton(image=pygame.transform.scale(BUTTON_IMAGE, (600, 100)), pos=(640, 370), 
+                            text_input="RESTART", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    exit_btn = MenuButton(image=pygame.transform.scale(BUTTON_IMAGE, (600, 100)), pos=(640, 490), 
+                          text_input="MAIN MENU", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+    
+    pause_buttons = [resume_btn, restart_btn, exit_btn]
 
     while True:
         clock.tick(60)
-
+        SCREEN.fill("black") 
         PLAY_MOUSE_POS = pygame.mouse.get_pos()
 
-        SCREEN.fill("black") 
-        
-        player.update(WINDOW_SIZE) 
-        player_group.draw(SCREEN)
-        
-        PLAY_TEXT = get_font(45).render("SINGLEPLAYER", True, "White")
-        PLAY_RECT = PLAY_TEXT.get_rect(center=(640, 50))
-        SCREEN.blit(PLAY_TEXT, PLAY_RECT)
+        if not pause:
+            players_group.update(WINDOW_SIZE)
 
-        PLAY_BACK = Button(image=None, pos=(1100, 650), 
-                            text_input="BACK", font=get_font(50), base_color="White", hovering_color="Green")
+        players_group.draw(SCREEN)
 
-        PLAY_BACK.changeColor(PLAY_MOUSE_POS)
-        PLAY_BACK.update(SCREEN)
+        if pause:
+            pygame.draw.rect(SURFACE, (0, 0, 0, 150), [0, 0, 1280, 720])
+            SCREEN.blit(SURFACE, (0, 0))
+            
+            for button in pause_buttons:
+                button.changeColor(PLAY_MOUSE_POS)
+                button.update(SCREEN)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
-            
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                    player.moving_right = True
-                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                    player.moving_left = True
-                
-                if event.key == pygame.K_SPACE or event.key == pygame.K_w or event.key == pygame.K_UP:
-                    player.jump()
-
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                    player.moving_right = False
-                if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                    player.moving_left = False
+                sys.exit()                
 
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BACK.checkForInput(PLAY_MOUSE_POS):
-                    main_menu()
+                if pause:
+                    if resume_btn.checkForInput(PLAY_MOUSE_POS):
+                        pause = False
+                    
+                    if restart_btn.checkForInput(PLAY_MOUSE_POS):
+                        player1.reset()
+                        player2.reset()
+                        pause = False
+                        
+                    if exit_btn.checkForInput(PLAY_MOUSE_POS):
+                        return
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = not pause 
+
+                if not pause:
+                    if event.key == pygame.K_d: player1.moving_right = True
+                    if event.key == pygame.K_a: player1.moving_left = True
+                    if event.key == pygame.K_w: player1.jump()
+                    
+                    if event.key == pygame.K_RIGHT: player2.moving_right = True
+                    if event.key == pygame.K_LEFT: player2.moving_left = True
+                    if event.key == pygame.K_UP: player2.jump()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_d: player1.moving_right = False
+                if event.key == pygame.K_a: player1.moving_left = False
+                if event.key == pygame.K_RIGHT: player2.moving_right = False
+                if event.key == pygame.K_LEFT: player2.moving_left = False
 
         pygame.display.update()
 
