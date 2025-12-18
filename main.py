@@ -1,7 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from button import Button, MenuButton
-from character import Character
+from character import Punk, Cyborg, Biker
 
 clock = pygame.time.Clock()
 
@@ -77,7 +77,7 @@ def main_menu():
             pygame.display.update()
 
 def singleplayer():
-    player = Character((100, 300))
+    player = Cyborg((100, 300))
 
     player_group = pygame.sprite.GroupSingle()
     player_group.add(player)

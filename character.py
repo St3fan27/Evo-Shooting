@@ -5,11 +5,18 @@ class Character(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
         
+        self.animations = {'idle': [], 'run': [], 'jump': []}
+        
         self.import_character_assets()
         
         self.frame_index = 0
         self.animation_speed = 0.15 
-        self.image = self.animations['idle'][self.frame_index]
+        
+        if self.animations['idle']:
+            self.image = self.animations['idle'][self.frame_index]
+        else:
+            self.image = pygame.Surface((32, 32))
+            
         self.rect = self.image.get_rect(topleft = pos)
 
         self.position = Vector2(pos) 
@@ -25,31 +32,23 @@ class Character(pygame.sprite.Sprite):
         self.moving_right = False
         self.moving_left = False
 
+    def load_frames(self, path, frame_count):
+        try:
+            sheet = pygame.image.load(path).convert_alpha()
+            frames = []
+            width = sheet.get_width() // frame_count
+            height = sheet.get_height()
+            
+            for i in range(frame_count):
+                frame = sheet.subsurface((i * width, 0, width, height))
+                frames.append(frame)
+            return frames
+        except FileNotFoundError:
+            print(f"EROARE: Nu am gasit imaginea: {path}")
+            return [pygame.Surface((32,32))] 
+
     def import_character_assets(self):
-        self.animations = {'idle': [], 'run': [], 'jump': []}
-        
-        path_idle = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_idle.png" 
-        path_run = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_run.png"  
-        path_jump = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_jump.png" 
-
-        def get_frames(path, frame_count):
-            try:
-                sheet = pygame.image.load(path).convert_alpha()
-                frames = []
-                width = sheet.get_width() // frame_count
-                height = sheet.get_height()
-                
-                for i in range(frame_count):
-                    frame = sheet.subsurface((i * width, 0, width, height))
-                    frames.append(frame)
-                return frames
-            except FileNotFoundError:
-                print(f"EROARE: Nu am gasit imaginea: {path}")
-                return [pygame.Surface((32,32))] 
-
-        self.animations['idle'] = get_frames(path_idle, 4) 
-        self.animations['run'] = get_frames(path_run, 6) 
-        self.animations['jump'] = get_frames(path_jump, 4)
+        pass 
 
     def animate(self):
         animation = self.animations[self.state]
@@ -95,12 +94,10 @@ class Character(pygame.sprite.Sprite):
         self.get_input()
         self.get_status() 
         self.animate()    
-        
         self.apply_gravity()
         self.position += self.velocity
         
         ground_offset = 0 
-        
         ground_level = window_size[1] - self.image.get_height() + ground_offset
         
         if self.position.y >= ground_level:
@@ -111,3 +108,37 @@ class Character(pygame.sprite.Sprite):
             self.on_ground = False
             
         self.rect.topleft = self.position
+
+
+class Biker(Character):
+    def import_character_assets(self):
+        path_idle = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/1 Biker/Biker_idle.png" 
+        path_run = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/1 Biker/Biker_run.png"  
+        path_jump = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/1 Biker/Biker_jump.png" 
+        
+        self.animations['idle'] = self.load_frames(path_idle, 4) 
+        self.animations['run'] = self.load_frames(path_run, 6) 
+        self.animations['jump'] = self.load_frames(path_jump, 4)
+
+class Punk(Character):
+    def import_character_assets(self):
+        path_idle = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_idle.png" 
+        path_run = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_run.png"  
+        path_jump = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/2 Punk/Punk_jump.png" 
+        
+        self.animations['idle'] = self.load_frames(path_idle, 4) 
+        self.animations['run'] = self.load_frames(path_run, 6) 
+        self.animations['jump'] = self.load_frames(path_jump, 4)
+
+
+class Cyborg(Character):
+    def import_character_assets(self):
+        path_idle = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/3 Cyborg/Cyborg_idle.png" 
+        path_run = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/3 Cyborg/Cyborg_run.png"  
+        path_jump = "assets/craftpix-net-856554-free-3-cyberpunk-characters-pixel-art/3 Cyborg/Cyborg_jump.png" 
+        
+        self.animations['idle'] = self.load_frames(path_idle, 4) 
+        self.animations['run'] = self.load_frames(path_run, 6) 
+        self.animations['jump'] = self.load_frames(path_jump, 4)
+
+
